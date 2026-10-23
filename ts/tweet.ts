@@ -53,15 +53,46 @@ class Tweet {
             return "unknown";
         }
         //TODO: parse the activity type from the text of the tweet
-        return "";
+        if (
+            this.text.toLowerCase().includes("swim")
+        ) return "swim";
+            
+        else if (
+            this.text.toLowerCase().includes("bike") ||
+            this.text.toLowerCase().includes("cycle")
+        )return "bike";
+        
+        else if (
+            this.text.toLowerCase().includes("ski") || 
+            this.text.toLowerCase().includes("snow")
+        ) return "ski";
+
+        else if (
+            this.text.toLowerCase().includes("walk")
+        ) return "walk";
+
+        else if (
+            this.text.toLowerCase().includes("km run") ||
+            this.text.toLowerCase().includes("mi run") 
+        ) return "run";
+            
+        return "other";
     }
 
     get distance(): number {
         if (this.source != "completed_event") {
             return 0;
         }
-        //TODO: prase the distance from the text of the tweet
-        return 0;
+
+        //regex for digit as 
+        const regex = /(\d+(?:\.\d+)?) (km|mi)\b/;
+        const match = this.text.match(regex);
+        if(!match) return 0;
+        
+        const distance = parseFloat(match[1]);
+
+        //return, handle case km conversion -> mi
+        return match[2] == "km" ? distance / 1.609 : distance;
     }
 
     getHTMLTableRow(rowNumber: number): string {
