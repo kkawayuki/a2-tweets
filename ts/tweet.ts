@@ -37,7 +37,7 @@ class Tweet {
 
     //returns a boolean, whether the text includes any content written by the person tweeting.
     get written(): boolean {
-        return(this.text.includes(" - "));
+        return this.text.includes(" - ");
     }
 
     get writtenText(): string {
@@ -45,10 +45,10 @@ class Tweet {
             return "";
         }
 
-        let indexStart = this.text.indexOf("-" + 3);
+        let indexStart = this.text.indexOf(" - ") + 3;
         let indexEnd = this.text.indexOf("https://");
 
-        let written = this.text.substring(indexStart,indexEnd);
+        let written = this.text.substring(indexStart, indexEnd);
         return written;
     }
 
@@ -56,31 +56,31 @@ class Tweet {
         if (this.source != "completed_event") {
             return "unknown";
         }
-        
+
         //pull the activity name out of the auto-generated part, e.g. "Just completed a 4.87 km run with @Runkeeper"
         //so the user's own written text can't affect the category
-        const regex = /just (?:completed|posted) an? (?:[\d.]+ ?(?:km|mi) )?(.+?)(?: with @?Runkeeper| - | in \d|\s+https)/i;
+        const regex =
+            /just (?:completed|posted) an? (?:[\d.]+ ?(?:km|mi) )?(.+?)(?: with @?Runkeeper| - | in \d|\s+https)/i;
         const match = this.text.match(regex);
-        if(!match) return "other";
+        if (!match) return "other";
 
         //keep the 7 most common activities, everything else (including the generic "activity") goes to other
-        switch(match[1].toLowerCase())
-        {
-            case("run"):
+        switch (match[1].toLowerCase()) {
+            case "run":
                 return "run";
-            case("walk"):
-            case("nordic walk"):
+            case "walk":
+            case "nordic walk":
                 return "walk";
-            case("bike"):
-            case("mtn bike"):
+            case "bike":
+            case "mtn bike":
                 return "bike";
-            case("elliptical workout"):
+            case "elliptical workout":
                 return "elliptical";
-            case("strength workout"):
+            case "strength workout":
                 return "strength";
-            case("hike"):
+            case "hike":
                 return "hike";
-            case("swim"):
+            case "swim":
                 return "swim";
             default:
                 return "other";
@@ -95,8 +95,8 @@ class Tweet {
         //regex for isolating distance digit
         const regex = /(\d+(?:\.\d+)?) (km|mi)\b/;
         const match = this.text.match(regex);
-        if(!match) return 0;
-        
+        if (!match) return 0;
+
         const distance = parseFloat(match[1]);
 
         //return, handle case km conversion -> mi
@@ -105,6 +105,16 @@ class Tweet {
 
     getHTMLTableRow(rowNumber: number): string {
         //TODO: return a table row which summarizes the tweet with a clickable link to the RunKeeper activity
-        return "<tr></tr>";
+        const activity = this.activityType;
+        const linkedText = this.text.replace(
+            /https:\/\/\S+/g,
+            '<a href="$&">$&</a>',
+        );
+
+        return `<tr>
+            <td>${rowNumber}</td>
+            <td>${activity}</td>
+            <td>${linkedText}</td>
+        </tr>`;
     }
 }

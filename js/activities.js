@@ -7,17 +7,12 @@ function parseTweets(runkeeper_tweets) {
 
     tweet_array = runkeeper_tweets.map(function (tweet) {
         return new Tweet(tweet.text, tweet.created_at);
-    });
-
-    //TODO: create a new array or manipulate tweet_array to create a graph of the number of tweets containing each type of activity.
-
-    //filter out non-completed tweets
-    let data_arr = tweet_array.filter(function (tweet) {
+    }).filter(function (tweet) {
         return tweet.source === "completed_event";
     });
 
     //create array of data to feed graph creator
-    let obj_array = data_arr.map(function (tweet) {
+    let obj_array = tweet_array.map(function (tweet) {
         return {
             activity: tweet.activityType,
             distance: tweet.distance,
@@ -50,9 +45,6 @@ function parseTweets(runkeeper_tweets) {
         },
     };
     vegaEmbed("#activityVis", activity_vis_spec, { actions: false });
-    
-    //TODO: create the visualizations which group the three most-tweeted activities by the day of the week.
-    //Use those visualizations to answer the questions about which activities tended to be longest and when.
 
 	//filter out three most popular
 	const top3 = ["run", "walk", "bike"];	
@@ -105,7 +97,7 @@ function parseTweets(runkeeper_tweets) {
     };
     vegaEmbed("#distanceVisAggregated", distance_agg_spec, { actions: false });
 
-	//hide mean graph intially
+	//logic for HTML display toggling
 	const aggDisplay = document.getElementById("distanceVisAggregated");
 	aggDisplay.style.display = "none";
 	const visDisplay = document.getElementById("distanceVis");
