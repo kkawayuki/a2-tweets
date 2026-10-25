@@ -44,39 +44,47 @@ class Tweet {
         if (!this.written) {
             return "";
         }
-        //TODO: parse the written text from the tweet
-        return "";
+
+        let indexStart = this.text.indexOf("-" + 3);
+        let indexEnd = this.text.indexOf("https://");
+
+        let written = this.text.substring(indexStart,indexEnd);
+        return written;
     }
 
     get activityType(): string {
         if (this.source != "completed_event") {
             return "unknown";
         }
-        //TODO: parse the activity type from the text of the tweet
-        if (
-            this.text.toLowerCase().includes("swim")
-        ) return "swim";
-            
-        else if (
-            this.text.toLowerCase().includes("bike") ||
-            this.text.toLowerCase().includes("cycle")
-        )return "bike";
         
-        else if (
-            this.text.toLowerCase().includes("ski") || 
-            this.text.toLowerCase().includes("snow")
-        ) return "ski";
+        //pull the activity name out of the auto-generated part, e.g. "Just completed a 4.87 km run with @Runkeeper"
+        //so the user's own written text can't affect the category
+        const regex = /just (?:completed|posted) an? (?:[\d.]+ ?(?:km|mi) )?(.+?)(?: with @?Runkeeper| - | in \d|\s+https)/i;
+        const match = this.text.match(regex);
+        if(!match) return "other";
 
-        else if (
-            this.text.toLowerCase().includes("walk")
-        ) return "walk";
-
-        else if (
-            this.text.toLowerCase().includes("km run") ||
-            this.text.toLowerCase().includes("mi run") 
-        ) return "run";
-            
-        return "other";
+        //keep the 7 most common activities, everything else (including the generic "activity") goes to other
+        switch(match[1].toLowerCase())
+        {
+            case("run"):
+                return "run";
+            case("walk"):
+            case("nordic walk"):
+                return "walk";
+            case("bike"):
+            case("mtn bike"):
+                return "bike";
+            case("elliptical workout"):
+                return "elliptical";
+            case("strength workout"):
+                return "strength";
+            case("hike"):
+                return "hike";
+            case("swim"):
+                return "swim";
+            default:
+                return "other";
+        }
     }
 
     get distance(): number {
@@ -84,7 +92,7 @@ class Tweet {
             return 0;
         }
 
-        //regex for digit as 
+        //regex for isolating distance digit
         const regex = /(\d+(?:\.\d+)?) (km|mi)\b/;
         const match = this.text.match(regex);
         if(!match) return 0;
